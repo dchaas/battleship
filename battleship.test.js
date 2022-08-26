@@ -4,7 +4,17 @@ const { Ship } = require("./battleship.js");
 //   let ship = Ship();
 // });
 
-test("Test the ships hit function", () => {
-  let ship = Ship(5);
-  expect(ship.hit()).toBe("hello");
+test("Test the ships hit and sunk function not sunk", () => {
+  let ship = Ship(3);
+  ship.hit(0);
+  ship.hit(1);
+  expect(ship.isSunk()).toBe(false);
+});
+
+test("Test the ships hit and sunk function sunk", () => {
+  let ship = Ship(3);
+  ship.hit(0);
+  ship.hit(1);
+  ship.hit(2);
+  expect(ship.isSunk()).toBe(true);
 });

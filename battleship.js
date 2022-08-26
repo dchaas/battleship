@@ -1,10 +1,22 @@
 const Ship = (_length) => {
-  let len = _length;
-  const hit = () => {
-    return "hello";
+  let deck = Array(parseFloat(_length)).fill("");
+  let len = deck.length;
+
+  const hit = (pos) => {
+    deck[pos] = "hit";
   };
 
-  return { hit, len };
+  const isSunk = () => {
+    let sunk = true;
+    deck.forEach((pos) => {
+      if (pos !== "hit") {
+        sunk = false;
+      }
+    });
+    return sunk;
+  };
+
+  return { hit, len, isSunk };
 };
 
 module.exports = { Ship };
