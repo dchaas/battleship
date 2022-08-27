@@ -54,11 +54,14 @@ const Gameboard = () => {
         (x > 0 && tmp == board[x - 1][y])
       ) {
         board[x][y].hit(x);
+        return "hit";
       } else {
         board[x][y].hit(y);
+        return "hit";
       }
     } else {
       board[x][y] = "x";
+      return "x";
     }
   };
 
@@ -78,4 +81,37 @@ const Gameboard = () => {
   return { board, placeShip, receiveAttack, allSunk };
 };
 
-module.exports = { Ship, Gameboard };
+const Player = (_name, _ai = false) => {
+  let name = _name;
+  let gameBoard = Gameboard();
+  let ai = _ai;
+  let guessed = Array.from({ length: 10 }, () =>
+    Array.from({ length: 10 }, () => "")
+  );
+
+  const guess = (opponent, _x, _y) => {
+    let x = _x;
+    let y = _y;
+    if (ai) {
+      x = Math.floor(Math.random() * 10);
+      y = Math.floor(Math.random() * 10);
+      while (guessed[x][y] !== "") {
+        x = Math.floor(Math.random() * 10);
+        y = Math.floor(Math.random() * 10);
+      }
+    }
+    guessed[x][y] = opponent.gameBoard.receiveAttack(x, y);
+  };
+
+  return { name, gameBoard, guessed, guess };
+};
+
+const render = (() => {
+  return {};
+})();
+
+const Game = (() => {
+  return {};
+})();
+
+module.exports = { Ship, Gameboard, Player, render, Game };

@@ -1,4 +1,4 @@
-const { Ship, Gameboard } = require("./battleship.js");
+const { Ship, Gameboard, Player, render, Game } = require("./battleship.js");
 
 // beforeAll(() => {
 //   let ship = Ship();
@@ -46,16 +46,14 @@ test("Test the all sunk failed functionality", () => {
   expect(game.allSunk()).toBe(false);
 });
 
-test("Test the all sunk true functionality", () => {
-  let game = Gameboard();
-  game.placeShip([0, 0], [0, 3]);
-  game.placeShip([1, 0], [1, 2]);
-  game.receiveAttack(0, 0);
-  game.receiveAttack(0, 1);
-  game.receiveAttack(0, 2);
-  game.receiveAttack(0, 3);
-  game.receiveAttack(1, 0);
-  game.receiveAttack(1, 1);
-  game.receiveAttack(1, 2);
-  expect(game.allSunk()).toBe(true);
+test("Test the player guess functionality", () => {
+  let player = Player("Daniel", false);
+  let opp = Player("wall-e", true);
+
+  opp.gameBoard.placeShip([4, 4], [4, 5]);
+
+  player.guess(opp, 1, 0);
+  player.guess(opp, 4, 4);
+  expect(player.guessed[1][0]).toBe("x");
+  expect(player.guessed[4][4]).toBe("hit");
 });
