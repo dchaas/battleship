@@ -107,11 +107,93 @@ const Player = (_name, _ai = false) => {
 };
 
 const render = (() => {
-  return {};
+  const _p1Name = document.querySelector("#name1");
+  const _p2Name = document.querySelector("#name2");
+
+  const _p1Card = document.querySelector("#player1");
+  const _p2Card = document.querySelector("#player2");
+
+  const _processGuess = (event, player, opp) => {
+    let guessString = event.target.getAttribute("data");
+    let x = parseInt(guessString[0]);
+    let y = parseInt(guessString[1]);
+    player.guess(opp, x, y);
+    Boards(player, opp);
+  };
+
+  const _Board = (player, opp, board, card) => {
+    // clear the board's content first
+    card.innerHTML = "";
+    // populate dynamically
+    for (let i = 0; i < 10; i++) {
+      for (let j = 0; j < 10; j++) {
+        let tile = document.createElement("div");
+        tile.classList.add("space");
+        tile.setAttribute("data", `${i}${j}`);
+        tile.addEventListener("click", function (ev) {
+          _processGuess(ev, player, opp);
+        });
+        if (board[i][j] === "") {
+          tile.innerHTML = ` `;
+        } else if (typeof board[i][j] === "object") {
+          tile.innerHTML = ``;
+          tile.classList.add("ship");
+        } else if (board[i][j] === "hit") {
+          tile.innerHTML = `✓`;
+          tile.classList.add("hit");
+        } else {
+          tile.innerHTML = `${board[i][j]}`;
+        }
+
+        card.appendChild(tile);
+      }
+    }
+  };
+
+  const Boards = (player, opp) => {
+    _Board(player, opp, player.gameBoard.board, _p1Card);
+    _Board(player, opp, player.guessed, _p2Card);
+  };
+
+  return { Boards };
 })();
 
 const Game = (() => {
-  return {};
+  let p1 = {};
+  let p2 = {};
+  const initGame = () => {
+    // create the players
+    p1 = Player("Daniel");
+    p2 = Player("pc", true);
+    // for now, place ships in advance
+    p1.gameBoard.placeShip([0, 0], [0, 4]);
+    p1.gameBoard.placeShip([1, 5], [1, 9]);
+    p1.gameBoard.placeShip([2, 0], [5, 0]);
+    p1.gameBoard.placeShip([7, 5], [9, 5]);
+    p1.gameBoard.placeShip([4, 4], [4, 7]);
+
+    p2.gameBoard.placeShip([0, 0], [0, 4]);
+    p2.gameBoard.placeShip([1, 5], [1, 9]);
+    p2.gameBoard.placeShip([2, 0], [5, 0]);
+    p2.gameBoard.placeShip([7, 5], [9, 5]);
+    p2.gameBoard.placeShip([4, 4], [4, 7]);
+
+    p2.guess(p1);
+    p2.guess(p1);
+    p2.guess(p1);
+    p2.guess(p1);
+
+    p1.guess(p2, 0, 3);
+    p1.guess(p2, 5, 5);
+
+    render.Boards(p1, p2);
+  };
+
+  const loop = () => {};
+
+  return { initGame, loop };
 })();
+
+Game.initGame();
 
 module.exports = { Ship, Gameboard, Player, render, Game };

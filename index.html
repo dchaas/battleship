@@ -4,10 +4,46 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="style.css" />
     <title>Battleship</title>
   </head>
   <body>
+    <div class="header">
+      <img src="assets/ship.png" alt="ship" />
+      <h1>BATTLESHIP</h1>
+      <img src="assets/ship.png" alt="ship" />
+    </div>
+    <div class="container">
+      <div class="columns">
+        <div class="column">A</div>
+        <div class="column">B</div>
+        <div class="column">C</div>
+        <div class="column">D</div>
+        <div class="column">E</div>
+        <div class="column">F</div>
+        <div class="column">G</div>
+        <div class="column">H</div>
+        <div class="column">I</div>
+        <div class="column">J</div>
+      </div>
+      <div class="player-container">
+        <div class="player" id="player1"></div>
+        <h1 id="name1">Your Ships</h1>
+      </div>
+      <div class="player-container">
+        <div class="player" id="player2"></div>
+        <h1 id="name1">Opponent's</h1>
+      </div>
+    </div>
+    <a href="https://www.flaticon.com/free-icons/ship" title="ship icons"
+      >Ship icons created by Freepik - Flaticon</a
+    >
     <script src="battleship.js"></script>
   </body>
 </html>

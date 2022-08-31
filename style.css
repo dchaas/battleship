@@ -1,0 +1,95 @@
+body {
+  font-family: "IBM Plex Mono", monospace;
+  background-color: #d3e0ea;
+  margin: 0px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 100px;
+}
+
+.header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #276678;
+  gap: 20px;
+}
+
+h1 {
+  font-size: 4.5rem;
+  text-shadow: 2px 2px 2px black;
+}
+
+img {
+  width: 15%;
+  position: relative;
+  top: 80px;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 50px;
+}
+
+.player-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#name1,
+#name2 {
+  font-size: 2rem;
+  text-shadow: none;
+}
+
+.player {
+  width: 50vh;
+  height: 50vh;
+  border: solid 2px black;
+  border-radius: 5px;
+  background-color: rgb(141, 161, 180);
+  box-shadow: 2px 2px 15px 0px gray;
+  display: grid;
+  grid-template-columns: repeat(10, 5vh);
+  grid-template-rows: repeat(10, 5vh);
+}
+
+.space {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: solid 1px;
+  width: 5vh;
+  height: 5vh;
+  border-radius: 3px;
+}
+
+.space:hover {
+  color: rgb(253, 253, 253);
+  background-color: orange;
+}
+
+.space:active {
+  color: rgb(253, 253, 253);
+  background-color: rgb(192, 128, 8);
+}
+
+.ship {
+  background-color: rgb(241, 212, 47);
+}
+
+.hit {
+  background-color: red;
+  color: white;
+}
+
+.column {
+  width: 5vh;
+  height: 5vh;
+}
