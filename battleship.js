@@ -22,7 +22,7 @@ const Ship = (start, end) => {
     return sunk;
   };
 
-  return { hit, len, isSunk };
+  return { hit, len, isSunk, deck };
 };
 
 const Gameboard = () => {
@@ -44,6 +44,57 @@ const Gameboard = () => {
       }
     }
     return ship;
+  };
+
+  const _checkShipValid = (start, end) => {
+    if (start[0] > 9 || start[1] > 9 || end[0] > 9 || end[1] > 9) {
+      return false;
+    }
+    for (let i = start[0]; i <= end[0]; i++) {
+      if (typeof board[i][end[1]] === "object") {
+        return false;
+      }
+    }
+    for (let j = start[1]; j <= end[1]; j++) {
+      if (typeof board[end[0]][j] === "object") {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const _randomShip = (length) => {
+    let dir = Math.round(Math.random()); // 0 = horizontal, 1 = vertical
+    // get starting x,y
+    let x1 = Math.floor(Math.random() * 10);
+    let y1 = Math.floor(Math.random() * 10);
+    let x2 = 0;
+    let y2 = 0;
+    if (dir === 0) {
+      y2 = y1;
+      x2 = length - 1 + x1 < 10 ? x1 + length - 1 : x1 - length - 1;
+    } else {
+      x2 = x1;
+      y2 = length - 1 + y1 < 10 ? y1 + length - 1 : y1 - length - 1;
+    }
+    let start = [Math.min(x1, x2), Math.min(y1, y2)];
+    let end = [Math.max(x1, x2), Math.max(y1, y2)];
+    return { start, end };
+  };
+
+  const randomPlaceAllShips = () => {
+    let shipTypes = [5, 4, 3, 3, 2];
+    shipTypes.forEach((ship) => {
+      let valid = false;
+      while (!valid) {
+        let { start, end } = _randomShip(ship);
+        if (_checkShipValid(start, end)) {
+          placeShip(start, end);
+          valid = true;
+        }
+        console.log(valid);
+      }
+    });
   };
 
   const receiveAttack = (x, y) => {
@@ -78,7 +129,7 @@ const Gameboard = () => {
     return true;
   };
 
-  return { board, placeShip, receiveAttack, allSunk };
+  return { board, placeShip, receiveAttack, allSunk, randomPlaceAllShips };
 };
 
 const Player = (_name, _ai = false) => {
@@ -103,7 +154,7 @@ const Player = (_name, _ai = false) => {
     guessed[x][y] = opponent.gameBoard.receiveAttack(x, y);
   };
 
-  return { name, gameBoard, guessed, guess };
+  return { name, gameBoard, guessed, guess, ai };
 };
 
 const render = (() => {
@@ -136,7 +187,11 @@ const render = (() => {
         if (board[i][j] === "") {
           tile.innerHTML = ` `;
         } else if (typeof board[i][j] === "object") {
-          tile.innerHTML = ``;
+          if (board[i][j].deck[i] === "hit" || board[i][j].deck[j] === "hit") {
+            tile.innerHTML = `x`;
+          } else {
+            tile.innerHTML = ``;
+          }
           tile.classList.add("ship");
         } else if (board[i][j] === "hit") {
           tile.innerHTML = `✓`;
@@ -161,39 +216,84 @@ const render = (() => {
 const Game = (() => {
   let p1 = {};
   let p2 = {};
+  let p1Ready = false;
+  let p2Ready = false;
+
+  let guessBoard = document.querySelector("#player2");
+  guessBoard.addEventListener("click", () => {
+    p1Ready = true;
+    p2Ready = true;
+    console.log(p1Ready, p2Ready);
+  });
   const initGame = () => {
     // create the players
-    p1 = Player("Daniel");
-    p2 = Player("pc", true);
+    p1 = Player("Human");
+    p2 = Player("PC", true);
     // for now, place ships in advance
-    p1.gameBoard.placeShip([0, 0], [0, 4]);
-    p1.gameBoard.placeShip([1, 5], [1, 9]);
-    p1.gameBoard.placeShip([2, 0], [5, 0]);
-    p1.gameBoard.placeShip([7, 5], [9, 5]);
-    p1.gameBoard.placeShip([4, 4], [4, 7]);
+    // p1.gameBoard.placeShip([0, 0], [0, 4]);
+    // p1.gameBoard.placeShip([1, 5], [1, 9]);
+    // p1.gameBoard.placeShip([2, 0], [5, 0]);
+    // p1.gameBoard.placeShip([7, 5], [9, 5]);
+    // p1.gameBoard.placeShip([4, 4], [4, 7]);
 
-    p2.gameBoard.placeShip([0, 0], [0, 4]);
-    p2.gameBoard.placeShip([1, 5], [1, 9]);
-    p2.gameBoard.placeShip([2, 0], [5, 0]);
-    p2.gameBoard.placeShip([7, 5], [9, 5]);
-    p2.gameBoard.placeShip([4, 4], [4, 7]);
-
-    p2.guess(p1);
-    p2.guess(p1);
-    p2.guess(p1);
-    p2.guess(p1);
-
-    p1.guess(p2, 0, 3);
-    p1.guess(p2, 5, 5);
+    // p2.gameBoard.placeShip([0, 0], [4, 0]);
+    // p2.gameBoard.placeShip([1, 2], [1, 5]);
+    // p2.gameBoard.placeShip([5, 5], [8, 5]);
+    // p2.gameBoard.placeShip([9, 5], [9, 7]);
+    // p2.gameBoard.placeShip([8, 6], [8, 9]);
+    p1.gameBoard.randomPlaceAllShips();
+    p2.gameBoard.randomPlaceAllShips();
 
     render.Boards(p1, p2);
+    return { p1, p2 };
   };
 
-  const loop = () => {};
+  async function loop() {
+    let { p1, p2 } = initGame();
 
-  return { initGame, loop };
+    let p1Sunk = p1.gameBoard.allSunk();
+    let p2Sunk = p2.gameBoard.allSunk();
+
+    render.Boards(p1, p2);
+    // // continue while the ships aren't sunk yet
+    while (!p1Sunk && !p2Sunk) {
+      // player 1's turn
+      while (!p1Ready) {
+        if (p1.ai) {
+          p1.guess(p2);
+          render.Boards(p2, p1);
+          p1Ready = true;
+        } else {
+          await new Promise((res) => {
+            setTimeout(res, 1000);
+          });
+        }
+      }
+      p1Ready = false;
+      p2Ready = false;
+      // player 1's turn
+      while (!p2Ready) {
+        if (p2.ai) {
+          p2.guess(p1);
+          render.Boards(p1, p2);
+          p2Ready = true;
+        } else {
+          await new Promise((res) => {
+            setTimeout(res, 1000);
+          });
+        }
+      }
+      p1Ready = false;
+      p2Ready = false;
+
+      p1Sunk = p1.gameBoard.allSunk();
+      p2Sunk = p2.gameBoard.allSunk();
+    }
+  }
+
+  return { loop };
 })();
 
-Game.initGame();
+Game.loop();
 
 module.exports = { Ship, Gameboard, Player, render, Game };

@@ -1,6 +1,7 @@
 body {
   font-family: "IBM Plex Mono", monospace;
-  background-color: #d3e0ea;
+  /* background-color: #d3e0ea; */
+  background-image: linear-gradient(#d3e0ea, #4e7a9b);
   margin: 0px;
   display: flex;
   flex-direction: column;
@@ -87,9 +88,4 @@ img {
 .hit {
   background-color: red;
   color: white;
-}
-
-.column {
-  width: 5vh;
-  height: 5vh;
 }
