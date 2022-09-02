@@ -89,3 +89,14 @@ img {
   background-color: red;
   color: white;
 }
+
+.result {
+  position: absolute;
+  background-color: rgb(178, 233, 107);
+  border: solid 2px black;
+  border-radius: 10px;
+  font-size: 8rem;
+  padding: 30px;
+  box-shadow: 2px 2px 10px 0px rgb(119, 226, 69);
+  visibility: hidden;
+}

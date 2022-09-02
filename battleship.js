@@ -72,10 +72,10 @@ const Gameboard = () => {
     let y2 = 0;
     if (dir === 0) {
       y2 = y1;
-      x2 = length - 1 + x1 < 10 ? x1 + length - 1 : x1 - length - 1;
+      x2 = length - 1 + x1 < 10 ? x1 + (length - 1) : x1 - (length - 1);
     } else {
       x2 = x1;
-      y2 = length - 1 + y1 < 10 ? y1 + length - 1 : y1 - length - 1;
+      y2 = length - 1 + y1 < 10 ? y1 + (length - 1) : y1 - (length - 1);
     }
     let start = [Math.min(x1, x2), Math.min(y1, y2)];
     let end = [Math.max(x1, x2), Math.max(y1, y2)];
@@ -92,7 +92,6 @@ const Gameboard = () => {
           placeShip(start, end);
           valid = true;
         }
-        console.log(valid);
       }
     });
   };
@@ -140,15 +139,53 @@ const Player = (_name, _ai = false) => {
     Array.from({ length: 10 }, () => "")
   );
 
+  const checkOpen = () => {
+    for (let i = 0; i < 10; i++) {
+      for (j = 0; j < 10; j++) {
+        if (guessed[i][j] === "hit") {
+          console.log(`hit at ${i},${j}`);
+          if (i > 0) {
+            if (guessed[i - 1][j] === "") {
+              return [i - 1, j];
+            }
+          }
+          if (j > 0) {
+            if (guessed[i][j - 1] === "") {
+              return [i, j - 1];
+            }
+          }
+          if (i < 9) {
+            if (guessed[i + 1][j] === "") {
+              return [i + 1, j];
+            }
+          }
+          if (j < 9) {
+            if (guessed[i][j + 1] === "") {
+              return [i, j + 1];
+            }
+          }
+        }
+      }
+    }
+    return false;
+  };
+
   const guess = (opponent, _x, _y) => {
     let x = _x;
     let y = _y;
     if (ai) {
-      x = Math.floor(Math.random() * 10);
-      y = Math.floor(Math.random() * 10);
-      while (guessed[x][y] !== "") {
+      let open = checkOpen();
+      console.log(open);
+      if (open[0] >= 0) {
+        x = open[0];
+        y = open[1];
+      } else {
         x = Math.floor(Math.random() * 10);
         y = Math.floor(Math.random() * 10);
+        while (guessed[x][y] !== "") {
+          x = Math.floor(Math.random() * 10);
+          y = Math.floor(Math.random() * 10);
+        }
       }
     }
     guessed[x][y] = opponent.gameBoard.receiveAttack(x, y);
@@ -219,11 +256,11 @@ const Game = (() => {
   let p1Ready = false;
   let p2Ready = false;
 
+  let result = document.querySelector(".result");
   let guessBoard = document.querySelector("#player2");
   guessBoard.addEventListener("click", () => {
     p1Ready = true;
     p2Ready = true;
-    console.log(p1Ready, p2Ready);
   });
   const initGame = () => {
     // create the players
@@ -265,7 +302,7 @@ const Game = (() => {
           p1Ready = true;
         } else {
           await new Promise((res) => {
-            setTimeout(res, 1000);
+            setTimeout(res, 500);
           });
         }
       }
@@ -279,7 +316,7 @@ const Game = (() => {
           p2Ready = true;
         } else {
           await new Promise((res) => {
-            setTimeout(res, 1000);
+            setTimeout(res, 500);
           });
         }
       }
@@ -289,6 +326,13 @@ const Game = (() => {
       p1Sunk = p1.gameBoard.allSunk();
       p2Sunk = p2.gameBoard.allSunk();
     }
+
+    if (p1Sunk) {
+      result.innerHTML = "You LOST!";
+    } else {
+      result.innerHTML = "You WON!";
+    }
+    result.style.visibility = "visible";
   }
 
   return { loop };
