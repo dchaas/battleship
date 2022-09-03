@@ -103,5 +103,17 @@ img {
 
 .sample-ship {
   position: absolute;
-  left: 10%;
+  left: 8%;
+}
+
+.rotate {
+  display: flex;
+  flex-direction: row;
+}
+
+.instructions {
+  position: absolute;
+  top: 25%;
+  font-size: 2rem;
+  color: blue;
 }

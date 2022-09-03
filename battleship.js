@@ -220,9 +220,13 @@ const render = (() => {
         let tile = document.createElement("div");
         tile.classList.add("space");
         tile.setAttribute("data", `${i}${j}`);
-        tile.addEventListener("click", function (ev) {
-          _processGuess(ev, player, opp);
-        });
+        if (card === _p2Card) {
+          tile.addEventListener("click", function (ev) {
+            console.log(ev.target);
+            _processGuess(ev, player, opp);
+          });
+        }
+
         if (board[i][j] === "") {
           tile.innerHTML = ` `;
         } else if (typeof board[i][j] === "object") {
@@ -246,7 +250,7 @@ const render = (() => {
 
   const shipSelect = (length) => {
     // clear the previous content
-    _sampleShip.innerHTML = "Position Your Ship";
+    _sampleShip.innerHTML = "";
     for (let i = 0; i < length; i++) {
       let tile = document.createElement("div");
       tile.classList.add("space");
@@ -269,6 +273,13 @@ const Game = (() => {
   let p1Ready = false;
   let p2Ready = false;
   let ships = [5, 4, 3, 3, 2];
+  let orientation = 1; // 0 = horizontal, 1 = vertical
+
+  const _sampleShip = document.querySelector(".sample-ship");
+  _sampleShip.addEventListener("dblclick", (event) => {
+    event.target.parentNode.classList.toggle("rotate");
+    orientation = orientation === 1 ? 0 : 1;
+  });
 
   let result = document.querySelector(".result");
   let guessBoard = document.querySelector("#player2");
@@ -276,23 +287,31 @@ const Game = (() => {
 
   const placeHumanShip = (event) => {
     if (ships.length > 0) {
-      let newShip = ships.shift();
+      let newShip = ships[0];
       let selection = event.target.getAttribute("data");
       let x = parseInt(selection[0]);
       let y = parseInt(selection[1]);
       let start = [x, y];
       let end = [x + newShip - 1, y];
-      p1.gameBoard.placeShip(start, end);
-      render.shipSelect(ships[0]);
+      if (x + newShip - 1 < 10) {
+        ships.shift();
+        p1.gameBoard.placeShip(start, end);
+        render.shipSelect(ships[0]);
+      }
+      render.Boards(p1, p2);
     }
   };
-
-  yourBoard.addEventListener("click", placeHumanShip);
 
   const initGame = async () => {
     // create the players
     p1 = Player("Human");
     p2 = Player("PC", true);
+    render.shipSelect(5);
+    p2.gameBoard.randomPlaceAllShips();
+    render.Boards(p1, p2);
+
+    yourBoard.addEventListener("click", placeHumanShip);
+
     // for now, place ships in advance
     // p1.gameBoard.placeShip([0, 0], [0, 4]);
     // p1.gameBoard.placeShip([1, 5], [1, 9]);
@@ -305,23 +324,14 @@ const Game = (() => {
     // p2.gameBoard.placeShip([5, 5], [8, 5]);
     // p2.gameBoard.placeShip([9, 5], [9, 7]);
     // p2.gameBoard.placeShip([8, 6], [8, 9]);
-    render.shipSelect(5);
-    //p1.gameBoard.randomPlaceAllShips();
-    p2.gameBoard.randomPlaceAllShips();
-    render.Boards(p1, p2);
 
-    while (ships.length > 0) {
-      render.Boards(p1, p2);
-      await new Promise((res) => {
-        setTimeout(res, 500);
-      });
-    }
-    console.log("out of loop");
+    //p1.gameBoard.randomPlaceAllShips();
+
     return { p1, p2 };
   };
 
-  async function loop() {
-    let { p1, p2 } = await initGame();
+  function loop() {
+    let { p1, p2 } = initGame();
 
     let p1Sunk = p1.gameBoard.allSunk();
     let p2Sunk = p2.gameBoard.allSunk();
@@ -335,10 +345,6 @@ const Game = (() => {
           p1.guess(p2);
           render.Boards(p2, p1);
           p1Ready = true;
-        } else {
-          await new Promise((res) => {
-            setTimeout(res, 500);
-          });
         }
       }
       p1Ready = false;
@@ -349,10 +355,6 @@ const Game = (() => {
           p2.guess(p1);
           render.Boards(p1, p2);
           p2Ready = true;
-        } else {
-          await new Promise((res) => {
-            setTimeout(res, 500);
-          });
         }
       }
       p1Ready = false;
@@ -370,9 +372,10 @@ const Game = (() => {
     result.style.visibility = "visible";
   }
 
-  return { loop };
+  return { loop, initGame };
 })();
 
-Game.loop();
+Game.initGame();
+//Game.loop();
 
 module.exports = { Ship, Gameboard, Player, render, Game };
