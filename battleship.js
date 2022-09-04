@@ -105,7 +105,10 @@ const Gameboard = () => {
       ) {
         board[x][y].hit(x);
         return "hit";
-      } else {
+      } else if (
+        (y < 9 && tmp == board[x][y + 1]) ||
+        (y > 0 && tmp == board[x][y - 1])
+      ) {
         board[x][y].hit(y);
         return "hit";
       }
@@ -222,7 +225,6 @@ const render = (() => {
         tile.setAttribute("data", `${i}${j}`);
         if (card === _p2Card) {
           tile.addEventListener("click", function (ev) {
-            console.log(ev.target);
             _processGuess(ev, player, opp);
           });
         }
@@ -230,7 +232,29 @@ const render = (() => {
         if (board[i][j] === "") {
           tile.innerHTML = ` `;
         } else if (typeof board[i][j] === "object") {
-          if (board[i][j].deck[i] === "hit" || board[i][j].deck[j] === "hit") {
+          if (
+            i < 9 &&
+            board[i + 1][j] == board[i][j] &&
+            board[i][j].deck[i] === "hit"
+          ) {
+            tile.innerHTML = `x`;
+          } else if (
+            i > 0 &&
+            board[i - 1][j] == board[i][j] &&
+            board[i][j].deck[i] === "hit"
+          ) {
+            tile.innerHTML = `x`;
+          } else if (
+            j > 0 &&
+            board[i][j - 1] == board[i][j] &&
+            board[i][j].deck[j] === "hit"
+          ) {
+            tile.innerHTML = `x`;
+          } else if (
+            j < 9 &&
+            board[i][j + 1] == board[i][j] &&
+            board[i][j].deck[j] === "hit"
+          ) {
             tile.innerHTML = `x`;
           } else {
             tile.innerHTML = ``;
@@ -275,6 +299,9 @@ const Game = (() => {
   let ships = [5, 4, 3, 3, 2];
   let orientation = 1; // 0 = horizontal, 1 = vertical
 
+  let p1Sunk = false;
+  let p2Sunk = false;
+
   const _sampleShip = document.querySelector(".sample-ship");
   _sampleShip.addEventListener("dblclick", (event) => {
     event.target.parentNode.classList.toggle("rotate");
@@ -285,6 +312,21 @@ const Game = (() => {
   let guessBoard = document.querySelector("#player2");
   let yourBoard = document.querySelector("#player1");
 
+  function checkWin() {
+    p1Sunk = p1.gameBoard.allSunk();
+    p2Sunk = p2.gameBoard.allSunk();
+
+    if (p1Sunk) {
+      result.innerHTML = "You LOST!";
+      result.style.visibility = "visible";
+      result.style.backgroundColor = "red";
+      result.style.color = "white";
+    } else if (p2Sunk) {
+      result.innerHTML = "You WON!";
+      result.style.visibility = "visible";
+    }
+  }
+
   const placeHumanShip = (event) => {
     if (ships.length > 0) {
       let newShip = ships[0];
@@ -292,17 +334,30 @@ const Game = (() => {
       let x = parseInt(selection[0]);
       let y = parseInt(selection[1]);
       let start = [x, y];
-      let end = [x + newShip - 1, y];
-      if (x + newShip - 1 < 10) {
+      let end = [];
+      let checkValid = x + newShip - 1 < 10;
+      if (orientation === 0) {
+        end = [x, y + newShip - 1];
+        checkValid = y + newShip - 1 < 10;
+      } else {
+        end = [x + newShip - 1, y];
+      }
+
+      if (checkValid) {
         ships.shift();
         p1.gameBoard.placeShip(start, end);
         render.shipSelect(ships[0]);
       }
+
+      if (ships.length === 0) {
+        document.querySelector(".instructions").style.visibility = "hidden";
+      }
+
       render.Boards(p1, p2);
     }
   };
 
-  const initGame = async () => {
+  const initGame = () => {
     // create the players
     p1 = Player("Human");
     p2 = Player("PC", true);
@@ -333,49 +388,22 @@ const Game = (() => {
   function loop() {
     let { p1, p2 } = initGame();
 
-    let p1Sunk = p1.gameBoard.allSunk();
-    let p2Sunk = p2.gameBoard.allSunk();
+    const _p2Card = document.querySelector("#player2");
+    _p2Card.addEventListener("click", () => {
+      // after user clicks, process the computer guess
+      p2.guess(p1);
+      render.Boards(p1, p2);
+      checkWin();
+    });
 
     render.Boards(p1, p2);
     // // continue while the ships aren't sunk yet
-    while (!p1Sunk && !p2Sunk) {
-      // player 1's turn
-      while (!p1Ready) {
-        if (p1.ai) {
-          p1.guess(p2);
-          render.Boards(p2, p1);
-          p1Ready = true;
-        }
-      }
-      p1Ready = false;
-      p2Ready = false;
-      // player 1's turn
-      while (!p2Ready) {
-        if (p2.ai) {
-          p2.guess(p1);
-          render.Boards(p1, p2);
-          p2Ready = true;
-        }
-      }
-      p1Ready = false;
-      p2Ready = false;
-
-      p1Sunk = p1.gameBoard.allSunk();
-      p2Sunk = p2.gameBoard.allSunk();
-    }
-
-    if (p1Sunk) {
-      result.innerHTML = "You LOST!";
-    } else {
-      result.innerHTML = "You WON!";
-    }
-    result.style.visibility = "visible";
   }
 
-  return { loop, initGame };
+  return { loop };
 })();
 
-Game.initGame();
-//Game.loop();
+//Game.initGame();
+Game.loop();
 
 module.exports = { Ship, Gameboard, Player, render, Game };
